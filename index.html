@@ -124,6 +124,36 @@
   .shuffle-deck .card-back:nth-child(2) { transform:rotate(1deg); }
   .shuffle-deck .card-back:nth-child(3) { transform:rotate(0deg); }
   .shuffle-deck .card-back svg { width:100%; height:100%; }
+
+  /* シャッフルアニメーション */
+  @keyframes shuffleCard1 {
+    0%   { transform:rotate(-3deg) translate(0,0); }
+    15%  { transform:rotate(-25deg) translate(-60px,-30px); }
+    30%  { transform:rotate(15deg) translate(50px,-50px); }
+    50%  { transform:rotate(-10deg) translate(-30px,20px); }
+    70%  { transform:rotate(20deg) translate(40px,-20px); }
+    85%  { transform:rotate(-5deg) translate(-10px,10px); }
+    100% { transform:rotate(-3deg) translate(0,0); }
+  }
+  @keyframes shuffleCard2 {
+    0%   { transform:rotate(1deg) translate(0,0); }
+    20%  { transform:rotate(20deg) translate(55px,-40px); }
+    40%  { transform:rotate(-15deg) translate(-45px,-20px); }
+    60%  { transform:rotate(10deg) translate(30px,30px); }
+    80%  { transform:rotate(-8deg) translate(-20px,-10px); }
+    100% { transform:rotate(1deg) translate(0,0); }
+  }
+  @keyframes shuffleCard3 {
+    0%   { transform:rotate(0deg) translate(0,0); }
+    25%  { transform:rotate(-20deg) translate(-50px,20px); }
+    45%  { transform:rotate(25deg) translate(60px,-30px); }
+    65%  { transform:rotate(-12deg) translate(-25px,40px); }
+    85%  { transform:rotate(5deg) translate(15px,-15px); }
+    100% { transform:rotate(0deg) translate(0,0); }
+  }
+  .shuffling .card-back:nth-child(1) { animation:shuffleCard1 0.8s ease-in-out; }
+  .shuffling .card-back:nth-child(2) { animation:shuffleCard2 0.8s ease-in-out; }
+  .shuffling .card-back:nth-child(3) { animation:shuffleCard3 0.8s ease-in-out; }
   .shuffle-btn {
     padding:12px 32px; background:transparent;
     border:1px solid rgba(201,168,76,0.4); color:var(--gold);
@@ -540,12 +570,38 @@ function selectSpread(n) {
 
 function shuffleDeck() {
   const t = I18N[currentLang];
+  const deckEl = document.getElementById('shuffleDeck');
+
+  // シャッフルアニメーション（3回繰り返す）
+  let count = 0;
+  const maxShuffles = 3;
+  document.getElementById('shuffleBtn').disabled = true;
+  document.getElementById('shuffleStatus').textContent = '🔀 シャッフル中...';
+
+  function doShuffle() {
+    deckEl.classList.remove('shuffling');
+    void deckEl.offsetWidth; // reflow
+    deckEl.classList.add('shuffling');
+    count++;
+    if(count < maxShuffles) {
+      setTimeout(doShuffle, 850);
+    } else {
+      setTimeout(() => {
+        deckEl.classList.remove('shuffling');
+        drawCards();
+      }, 850);
+    }
+  }
+  doShuffle();
+}
+
+function drawCards() {
+  const t = I18N[currentLang];
   // デッキをシャッフルしてカードを引く
   const deck = [...TAROT_CARDS];
-  // Fisher-Yatesシャッフル
   for(let i=deck.length-1;i>0;i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [deck[i],deck[j]] = [deck[j],deck[i]];
+    const j=Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]]=[deck[j],deck[i]];
   }
 
   drawnCards = [];
@@ -556,20 +612,15 @@ function shuffleDeck() {
   for(let i=0;i<currentSpread;i++) {
     drawnCards.push({
       card: deck[i],
-      reversed: Math.random() < 0.35, // 35%の確率で逆位置
+      reversed: Math.random() < 0.35,
       pos: positions[i]
     });
   }
 
   shuffled = true;
+  document.getElementById('shuffleBtn').disabled = false;
   document.getElementById('shuffleStatus').textContent = t.shuffleStatusDone;
   document.getElementById('invokeBtn').disabled = false;
-
-  // デッキアニメーション
-  const deckEl = document.getElementById('shuffleDeck');
-  deckEl.style.transform = 'rotate(5deg)';
-  setTimeout(()=>deckEl.style.transform='rotate(0deg)', 300);
-
   renderSelectedCards();
 }
 
