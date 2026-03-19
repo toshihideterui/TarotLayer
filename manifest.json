@@ -4,8 +4,8 @@
   "description": "神秘のタロット占術アプリ",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0800",
-  "theme_color": "#0a0800",
+  "background_color": "#050818",
+  "theme_color": "#050818",
   "orientation": "portrait",
   "icons": [
     {

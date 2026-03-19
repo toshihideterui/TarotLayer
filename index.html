@@ -17,11 +17,11 @@
 </script>
 <style>
   :root {
-    --void: #08080e; --deep: #0d0d18; --ink: #121220;
+    --void: #050818; --deep: #080d28; --ink: #0d1238;
     --gold: #c9a84c; --gold-dim: #7a6230; --gold-bright: #f0d080;
     --amber: #d4820a; --crimson: #8b1a1a;
     --text: #e8dcc0; --text-dim: #7a7060;
-    --card-bg: #1a1200; --card-border: #c9a84c;
+    --card-bg: #0a1030; --card-border: #c9a84c;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
@@ -76,7 +76,7 @@
 
   .oracle-form {
     position:relative; border:1px solid rgba(201,168,76,0.15);
-    padding:40px 32px; margin-bottom:32px; background:rgba(26,21,0,0.6);
+    padding:40px 32px; margin-bottom:32px; background:rgba(8,13,40,0.7);
     backdrop-filter:blur(10px);
   }
   .corner { position:absolute; width:16px; height:16px; border-color:var(--gold-dim); border-style:solid; }
@@ -110,7 +110,7 @@
   /* カードシャッフルエリア */
   .shuffle-area {
     text-align:center; padding:32px; margin-bottom:24px;
-    border:1px solid rgba(201,168,76,0.1); background:rgba(201,168,76,0.02);
+    border:1px solid rgba(201,168,76,0.1); background:rgba(8,13,40,0.4);
   }
   .shuffle-deck {
     width:80px; height:120px; margin:0 auto 20px; position:relative; cursor:pointer;
@@ -173,7 +173,7 @@
   .loading-text { font-size:0.7rem; letter-spacing:0.4em; color:var(--text-dim); animation:fade-text 1.5s ease-in-out infinite; }
   @keyframes fade-text { 0%,100%{opacity:0.3} 50%{opacity:1} }
 
-  .result-scroll { display:none; margin-bottom:32px; border:1px solid rgba(201,168,76,0.2); padding:40px 32px; background:rgba(26,21,0,0.7); backdrop-filter:blur(10px); animation:fadeIn 0.8s ease; }
+  .result-scroll { display:none; margin-bottom:32px; border:1px solid rgba(201,168,76,0.2); padding:40px 32px; background:rgba(8,13,40,0.8); backdrop-filter:blur(10px); animation:fadeIn 0.8s ease; }
   .result-scroll.show { display:block; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
@@ -866,10 +866,10 @@ async function invokeTarot() {
   let frame = 0;
   function draw(){
     // 背景
-    ctx.fillStyle = `rgba(10,8,2,0.20)`;
+    ctx.fillStyle = `rgba(5,8,24,0.20)`;
     ctx.fillRect(0,0,canvas.width,canvas.height);
     if(frame===0){
-      ctx.fillStyle='#0a0802';
+      ctx.fillStyle='#050818';
       ctx.fillRect(0,0,canvas.width,canvas.height);
     }
 
