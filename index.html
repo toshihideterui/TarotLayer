@@ -702,183 +702,166 @@ async function invokeTarot() {
 }
 
 // ══════════════════════════════════════════
-// Night Sky Canvas（白・金・光の天使の羽）
+// Night Sky Canvas（小さな天使が複数浮かぶ）
 // ══════════════════════════════════════════
 (function() {
   const canvas=document.getElementById('skyCanvas');
   const ctx=canvas.getContext('2d');
   function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-  resize(); window.addEventListener('resize',()=>{resize();});
+  resize(); window.addEventListener('resize',()=>{resize();initAngels();});
 
-  // 羽の羽毛を描く関数
-  function drawFeather(cx, cy, len, angle, alpha, side) {
+  // 星
+  const STAR_COUNT=200; let stars=[];
+  function initStars(){
+    stars=[];
+    for(let i=0;i<STAR_COUNT;i++){
+      const r=Math.random();
+      stars.push({
+        x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+        radius:r<0.6?Math.random()*0.6+0.1:r<0.9?Math.random()*1.0+0.6:Math.random()*1.5+1.0,
+        baseAlpha:Math.random()*0.4+0.15, alpha:0,
+        twinkleSpeed:Math.random()*0.02+0.005, twinkleOffset:Math.random()*Math.PI*2,
+        color:r<0.2?'#f0d080':r<0.35?'#c8d8ff':'#ffffff',
+      });
+    }
+  }
+
+  // 天使を描く
+  function drawAngel(x, y, size, alpha, wingPhase) {
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(angle);
+    ctx.translate(x, y);
     ctx.globalAlpha = alpha;
+    const bs = size*0.5;
+    const ws = size;
+    const flap = Math.sin(wingPhase)*0.18;
 
-    const w = len * 0.18;
-    const flip = side === 'left' ? -1 : 1;
-
-    // 羽毛の軸
+    // 左羽
+    ctx.save(); ctx.rotate(-0.25+flap);
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(flip * Math.sin(0.3) * len * 0.3, -len);
-    ctx.strokeStyle = `rgba(240,220,150,${alpha*0.6})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.moveTo(0,-bs*0.2);
+    ctx.bezierCurveTo(-ws*1.3,-bs*0.9,-ws*1.5,bs*0.3,-ws*0.25,bs*0.5);
+    ctx.bezierCurveTo(-ws*0.7,bs*0.1,-ws*0.5,-bs*0.4,0,-bs*0.2);
+    const lg=ctx.createLinearGradient(-ws*1.4,0,0,0);
+    lg.addColorStop(0,`rgba(255,255,255,0)`);
+    lg.addColorStop(0.5,`rgba(240,230,200,${alpha*0.5})`);
+    lg.addColorStop(1,`rgba(255,248,220,${alpha*0.2})`);
+    ctx.fillStyle=lg; ctx.fill();
+    ctx.strokeStyle=`rgba(220,200,140,${alpha*0.35})`; ctx.lineWidth=0.5; ctx.stroke();
+    ctx.restore();
 
-    // 羽毛の形
+    // 右羽
+    ctx.save(); ctx.rotate(0.25-flap);
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(
-      flip * w * 2, -len * 0.3,
-      flip * w * 2.5, -len * 0.7,
-      flip * Math.sin(0.3) * len * 0.3, -len
-    );
-    ctx.bezierCurveTo(
-      flip * w * 0.5, -len * 0.7,
-      flip * w * 0.3, -len * 0.3,
-      0, 0
-    );
+    ctx.moveTo(0,-bs*0.2);
+    ctx.bezierCurveTo(ws*1.3,-bs*0.9,ws*1.5,bs*0.3,ws*0.25,bs*0.5);
+    ctx.bezierCurveTo(ws*0.7,bs*0.1,ws*0.5,-bs*0.4,0,-bs*0.2);
+    const rg=ctx.createLinearGradient(0,0,ws*1.4,0);
+    rg.addColorStop(0,`rgba(255,248,220,${alpha*0.2})`);
+    rg.addColorStop(0.5,`rgba(240,230,200,${alpha*0.5})`);
+    rg.addColorStop(1,`rgba(255,255,255,0)`);
+    ctx.fillStyle=rg; ctx.fill();
+    ctx.strokeStyle=`rgba(220,200,140,${alpha*0.35})`; ctx.lineWidth=0.5; ctx.stroke();
+    ctx.restore();
 
-    const grd = ctx.createLinearGradient(0, 0, flip * w, -len);
-    grd.addColorStop(0, `rgba(255,255,255,0)`);
-    grd.addColorStop(0.3, `rgba(255,248,220,${alpha*0.4})`);
-    grd.addColorStop(0.7, `rgba(240,220,160,${alpha*0.3})`);
-    grd.addColorStop(1, `rgba(255,255,255,0)`);
-    ctx.fillStyle = grd;
-    ctx.fill();
+    // 胴体
+    ctx.beginPath();
+    ctx.ellipse(0,bs*0.2,bs*0.25,bs*0.5,0,0,Math.PI*2);
+    const bg=ctx.createRadialGradient(0,bs*0.1,0,0,bs*0.2,bs*0.5);
+    bg.addColorStop(0,`rgba(255,248,220,${alpha*0.8})`);
+    bg.addColorStop(1,`rgba(200,175,120,${alpha*0.3})`);
+    ctx.fillStyle=bg; ctx.fill();
+
+    // 頭
+    ctx.beginPath(); ctx.arc(0,-bs*0.45,bs*0.26,0,Math.PI*2);
+    const hg=ctx.createRadialGradient(-bs*0.05,-bs*0.5,0,0,-bs*0.45,bs*0.26);
+    hg.addColorStop(0,`rgba(255,250,230,${alpha*0.9})`);
+    hg.addColorStop(1,`rgba(220,190,130,${alpha*0.5})`);
+    ctx.fillStyle=hg; ctx.fill();
+
+    // 光輪
+    ctx.beginPath();
+    ctx.ellipse(0,-bs*0.8,bs*0.3,bs*0.07,0,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(240,210,80,${alpha*0.8})`; ctx.lineWidth=bs*0.06; ctx.stroke();
 
     ctx.restore();
   }
 
-  // 羽全体を描く
-  function drawWings(t) {
-    const cx = canvas.width / 2;
-    const cy = canvas.height * 0.52;
-    const baseLen = Math.min(canvas.width, canvas.height) * 0.38;
-    const breathe = 1 + Math.sin(t * 0.008) * 0.03;
-
-    // 左右の羽を描く
-    ['left','right'].forEach(side => {
-      const flip = side === 'left' ? -1 : 1;
-      const feathers = 14;
-
-      for(let i = 0; i < feathers; i++) {
-        const ratio = i / (feathers - 1);
-        // 羽の広がり角度
-        const spreadAngle = (side === 'left' ? 1 : -1) * (0.3 + ratio * 1.1);
-        const len = baseLen * breathe * (0.55 + (1 - Math.abs(ratio - 0.4)) * 0.6);
-        const startX = cx + flip * ratio * baseLen * 0.55;
-        const startY = cy + ratio * baseLen * 0.12;
-        const alpha = 0.12 + (1 - Math.abs(ratio - 0.3)) * 0.12;
-        drawFeather(startX, startY, len, spreadAngle - Math.PI/2, alpha, side);
-      }
-
-      // 内側の小羽（上層）
-      for(let i = 0; i < 8; i++) {
-        const ratio = i / 7;
-        const spreadAngle = (side === 'left' ? 1 : -1) * (0.1 + ratio * 0.7);
-        const len = baseLen * breathe * 0.45 * (0.7 + (1 - ratio) * 0.3);
-        const startX = cx + flip * ratio * baseLen * 0.3;
-        const startY = cy - ratio * baseLen * 0.05;
-        const alpha = 0.18 + (1 - ratio) * 0.10;
-        drawFeather(startX, startY, len, spreadAngle - Math.PI/2, alpha, side);
-      }
-    });
-
-    // 中央の光のオーラ
-    const aura = ctx.createRadialGradient(cx, cy-baseLen*0.2, 0, cx, cy-baseLen*0.2, baseLen*0.6);
-    aura.addColorStop(0, `rgba(255,248,200,${0.06 + Math.sin(t*0.01)*0.03})`);
-    aura.addColorStop(0.4, `rgba(240,220,120,${0.03})`);
-    aura.addColorStop(1, 'transparent');
-    ctx.fillStyle = aura;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // 光のパーティクル
-  const PARTICLE_COUNT = 60;
-  let particles = [];
-  function initParticles(){
-    particles = [];
-    const cx = canvas.width/2;
-    const cy = canvas.height*0.52;
-    for(let i=0;i<PARTICLE_COUNT;i++){
-      const angle = Math.random()*Math.PI*2;
-      const dist = Math.random() * Math.min(canvas.width,canvas.height)*0.4;
-      particles.push({
-        x: cx + Math.cos(angle)*dist,
-        y: cy + Math.sin(angle)*dist*0.5,
-        vx: (Math.random()-0.5)*0.4,
-        vy: -Math.random()*0.6-0.2,
-        life: Math.random(),
-        maxLife: Math.random()*180+60,
-        size: Math.random()*2+0.5,
-        color: Math.random()<0.5?'255,248,200':'240,220,150',
+  // 天使オブジェクト
+  let angels=[];
+  function initAngels(){
+    angels=[];
+    const count = Math.max(4, Math.floor(Math.min(canvas.width,canvas.height)/160));
+    for(let i=0;i<count;i++){
+      angels.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:Math.random()*20+8,
+        vy:-(Math.random()*0.25+0.1),
+        vx:(Math.random()-0.5)*0.15,
+        alpha:Math.random()*0.2+0.06,
+        baseAlpha:Math.random()*0.2+0.06,
+        wingPhase:Math.random()*Math.PI*2,
+        wingSpeed:Math.random()*0.04+0.025,
+        swayOffset:Math.random()*Math.PI*2,
+        swaySpeed:Math.random()*0.006+0.003,
+        fadeDir:Math.random()<0.5?1:-1,
+        fadeSpeed:Math.random()*0.002+0.001,
       });
     }
   }
-  initParticles();
-  window.addEventListener('resize',()=>{resize();initParticles();});
 
-  function updateParticles(){
-    const cx = canvas.width/2;
-    const cy = canvas.height*0.52;
-    particles.forEach(p=>{
-      p.x += p.vx; p.y += p.vy;
-      p.life += 1/p.maxLife;
-      if(p.life>=1){
-        const angle = Math.random()*Math.PI*2;
-        const dist = Math.random()*Math.min(canvas.width,canvas.height)*0.4;
-        p.x = cx+Math.cos(angle)*dist;
-        p.y = cy+Math.sin(angle)*dist*0.5;
-        p.vx = (Math.random()-0.5)*0.4;
-        p.vy = -Math.random()*0.6-0.2;
-        p.life = 0;
-        p.maxLife = Math.random()*180+60;
-      }
-    });
-  }
-
-  function drawParticles(){
-    particles.forEach(p=>{
-      const a = Math.sin(p.life*Math.PI)*0.6;
-      ctx.globalAlpha = a;
-      ctx.fillStyle = `rgba(${p.color},1)`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-      ctx.fill();
-      // 光の十字
-      if(p.size > 1.5){
-        ctx.globalAlpha = a*0.4;
-        ctx.strokeStyle = `rgba(${p.color},1)`;
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(p.x-p.size*2,p.y); ctx.lineTo(p.x+p.size*2,p.y);
-        ctx.moveTo(p.x,p.y-p.size*2); ctx.lineTo(p.x,p.y+p.size*2);
-        ctx.stroke();
-      }
-    });
-    ctx.globalAlpha = 1;
-  }
-
-  let frame = 0;
-  function draw(){
-    // 背景
-    ctx.fillStyle = `rgba(5,8,24,0.20)`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    if(frame===0){
-      ctx.fillStyle='#050818';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
+  // パーティクル
+  let particles=[];
+  function initParticles(){
+    particles=[];
+    for(let i=0;i<35;i++){
+      particles.push({
+        x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+        vy:-(Math.random()*0.4+0.1), vx:(Math.random()-0.5)*0.2,
+        life:Math.random(), maxLife:Math.random()*200+80,
+        size:Math.random()*1.5+0.3,
+        color:Math.random()<0.5?'255,248,200':'200,220,255',
+      });
     }
+  }
 
-    // 羽
-    drawWings(frame);
+  initStars(); initAngels(); initParticles();
+
+  let frame=0;
+  function draw(){
+    ctx.fillStyle='rgba(5,8,24,0.18)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    if(frame===0){ ctx.fillStyle='#050818'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+
+    // 星
+    stars.forEach(s=>{
+      s.alpha=s.baseAlpha*(0.5+0.5*Math.sin(frame*s.twinkleSpeed+s.twinkleOffset));
+      ctx.globalAlpha=s.alpha; ctx.fillStyle=s.color;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.radius,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
+
+    // 天使
+    angels.forEach(a=>{
+      a.wingPhase+=a.wingSpeed;
+      a.x+=a.vx+Math.sin(frame*a.swaySpeed+a.swayOffset)*0.3;
+      a.y+=a.vy;
+      a.alpha+=a.fadeDir*a.fadeSpeed;
+      if(a.alpha>a.baseAlpha*1.6||a.alpha<a.baseAlpha*0.2) a.fadeDir*=-1;
+      if(a.y<-a.size*4){ a.y=canvas.height+a.size*2; a.x=Math.random()*canvas.width; }
+      if(a.x<-a.size*3) a.x=canvas.width+a.size*2;
+      if(a.x>canvas.width+a.size*3) a.x=-a.size*2;
+      drawAngel(a.x, a.y, a.size, Math.max(0.04,Math.min(0.32,a.alpha)), a.wingPhase);
+    });
 
     // パーティクル
-    updateParticles();
-    drawParticles();
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.life+=1/p.maxLife;
+      if(p.life>=1){ p.x=Math.random()*canvas.width; p.y=canvas.height+10; p.life=0; }
+      const a=Math.sin(p.life*Math.PI)*0.45;
+      ctx.globalAlpha=a; ctx.fillStyle=`rgba(${p.color},1)`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
 
     frame++; requestAnimationFrame(draw);
   }
