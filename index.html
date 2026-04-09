@@ -438,7 +438,7 @@ function makeCardSVG(card, reversed=false) {
     <text x="42" y="85" text-anchor="middle" font-size="8" fill="${card.color}">${card.ja}</text>
   </svg>`;
   return `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:3px;" alt="${card.ja}" loading="lazy">
-    ${reversed?'<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:0.55rem;color:#d4820a;background:rgba(0,0,0,0.5);transform:rotate(180deg);">▲ 逆位置</div>':''}`;
+    ${reversed?'':''}`;
 }
 
 // ══════════════════════════════════════════
@@ -666,7 +666,7 @@ function renderSelectedCards() {
       <div class="card-slot-label">${dc.pos}</div>
       <div class="card-visual ${dc.reversed?'reversed':''}">${makeCardSVG(dc.card, dc.reversed)}</div>
       <div class="card-name">${dc.card.ja}</div>
-      ${dc.reversed ? `<div class="card-reversed-label">▼ ${t.reversedLabel}</div>` : ''}
+      ${dc.reversed ? `` : ''}
     </div>
   `).join('');
 }
@@ -794,7 +794,7 @@ async function invokeTarot() {
       <div class="result-card-visual ${dc.reversed?'reversed':''}">${makeCardSVG(dc.card,dc.reversed)}</div>
       <div class="result-card-name">${dc.card.ja}</div>
       <div class="result-card-pos">${dc.pos}</div>
-      ${dc.reversed?`<div class="result-card-rev">▼ ${t2.reversedLabel}</div>`:''}
+      ${dc.reversed?``:''}
     </div>
   `).join('');
 
